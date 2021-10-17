@@ -16,9 +16,12 @@ class Hand:
             self.ace_score += card.value
         elif card.is_ace:
             self.ace_score = self.score + 10
-    
+
     def is_21(self) -> bool:
         return self.score == 21 or self.ace_score == 21
+
+    def is_blackjack(self) -> bool:
+        return self.is_21() and len(self.cards) == 2
 
     def is_bust(self) -> bool:
         return self.score > 21
@@ -29,7 +32,7 @@ class Hand:
     def str_scores(self) -> str:
         if self.ace_score != 0 and self.ace_score <= 21:
             return "{} or {}".format(self.score, self.ace_score)
-        return str(self.score)            
+        return str(self.score)
 
     def __str__(self) -> str:
         return " ".join(str(card) for card in self.cards)
@@ -42,6 +45,8 @@ class DealerHand(Hand):
     def str_scores(self) -> str:
         if not self.face_down:
             return super().str_scores()
+        if self.cards[0].is_ace:
+            return "1 or 11"
         return str(self.cards[0].value)
     
     def __str__(self) -> str:
