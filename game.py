@@ -38,7 +38,7 @@ class Game:
 
             while True:
                 try:
-                    bet = int(input("How much would you like to bet?: "))
+                    bet = int(input("How much would you like to bet?: $"))
                     if bet <= 0 or bet % self.bet_multiple != 0:
                         print("- Please enter bets in multiples of ${} -".format(self.bet_multiple))
                         continue
@@ -63,12 +63,6 @@ class Game:
             else: print()
         print()
 
-    def print_chip_stacks(self) -> None:
-        print("----- CHIP STACKS -----\n")
-        for player in self.players:
-            print("Player {} | ${}".format(player.id, player.chips))
-        print()
-
     def evaluate_results(self) -> None:
         print("----- RESULTS -----\n")
         self.print_scoreboard()
@@ -89,6 +83,7 @@ class Game:
             "won": 1,
             "won Blackjack": 1.5
         }
+        payouts = {}
         for player in self.players:
             if player.has_bust():
                 result = "busted"
@@ -107,8 +102,16 @@ class Game:
                         result = "lost"
                     else:
                         result = "tied"
-            print("Player {} {} with {}.".format(player.id, result, player.score()), end="")
+            print("Player {} {} with {}.".format(player.id, result, player.score()))
             payout = player.payout(multipliers[result])
+            payouts[player] = payout
+            sleep(self.delay)
+        print()
+
+        print("----- CHIP STACKS -----\n")
+        for player in self.players:
+            print("Player {} | ${}".format(player.id, player.chips), end="")
+            payout = payouts[player]
             if payout < 0:
                 print(" (-${})".format(abs(payout)))
             else:
@@ -121,7 +124,8 @@ class Game:
         self.player_count_loop()
         
         while True:
-            self.game_loop()
+            if not self.game_loop():
+                return
 
     def player_count_loop(self):
         while True:
@@ -138,15 +142,12 @@ class Game:
             else:
                 print("- Please enter a number between 1 and {} -".format(self.max_players))
     
-    # TODO:
-    # - check if player has money left after game ($0)
-    # - function to add players or cashout after each game
-    def game_loop(self) -> None:
+    def game_loop(self) -> bool:
         # READY LOOP
         while True:
             ans = input("Ready to Play? (Y/N): ")
             if ans.upper() == "Y": break
-            if ans.upper() == "N": return
+            if ans.upper() == "N": return False
             else: print("- Please answer Y/N -")
         print()
 
@@ -171,7 +172,7 @@ class Game:
         # stop game short if dealer has Blackjack
         if self.dealer_hand.is_blackjack():
             print("* Dealer has Blackjack. Checking player hands. *")
-            self.evauluate_results()
+            self.evaluate_results()
             return
         
         # play Blackjack for each player
@@ -231,8 +232,6 @@ class Game:
         
         # evaluate game outcome
         self.evaluate_results()
-        sleep(self.delay)
-        self.print_chip_stacks()
         sleep(self.delay)
 
 if __name__ == '__main__':

@@ -1,0 +1,4 @@
+TODO Priority:
+1. kick player if they have no money left after game ($0)
+2. function to add players or cashout after each game
+3. add double/split options
